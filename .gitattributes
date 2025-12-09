@@ -2,3 +2,11 @@
 pixi.lock merge=binary linguist-language=YAML linguist-generated=true
 
 magic.lock merge=binary linguist-language=YAML linguist-generated=true
+
+# Protect problem solutions from being overwritten by upstream merges
+problems/*.mojo merge=ours
+problems/*.py merge=ours
+problems/*/*.mojo merge=ours
+problems/*/*.py merge=ours
+problems/*/*/*.mojo merge=ours
+problems/*/*/*.py merge=ours
