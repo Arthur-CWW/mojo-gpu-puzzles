@@ -3,12 +3,12 @@ from gpu.host import DeviceContext
 from layout import Layout, LayoutTensor
 from testing import assert_equal
 
-alias SIZE = 5
-alias BLOCKS_PER_GRID = (2, 2)
-alias THREADS_PER_BLOCK = (3, 3)
-alias dtype = DType.float32
-alias out_layout = Layout.row_major(SIZE, SIZE)
-alias a_layout = Layout.row_major(SIZE, SIZE)
+comptime SIZE = 5
+comptime BLOCKS_PER_GRID = (2, 2)
+comptime THREADS_PER_BLOCK = (3, 3)
+comptime dtype = DType.float32
+comptime out_layout = Layout.row_major(SIZE, SIZE)
+comptime a_layout = Layout.row_major(SIZE, SIZE)
 
 
 # ANCHOR: add_10_blocks_2d_layout_tensor_solution
@@ -16,9 +16,9 @@ fn add_10_blocks_2d[
     out_layout: Layout,
     a_layout: Layout,
 ](
-    output: LayoutTensor[mut=True, dtype, out_layout],
-    a: LayoutTensor[mut=False, dtype, a_layout],
-    size: Int,
+    output: LayoutTensor[dtype, out_layout, MutAnyOrigin],
+    a: LayoutTensor[dtype, a_layout, ImmutAnyOrigin],
+    size: UInt,
 ):
     row = block_dim.y * block_idx.y + thread_idx.y
     col = block_dim.x * block_idx.x + thread_idx.x
@@ -31,43 +31,44 @@ fn add_10_blocks_2d[
 
 def main():
     with DeviceContext() as ctx:
-        out_buf = ctx.enqueue_create_buffer[dtype](SIZE * SIZE).enqueue_fill(0)
-        out_tensor = LayoutTensor[dtype, out_layout, MutableAnyOrigin](
-            out_buf.unsafe_ptr()
-        )
+        out_buf = ctx.enqueue_create_buffer[dtype](SIZE * SIZE)
+        out_buf.enqueue_fill(0)
+        out_tensor = LayoutTensor[dtype, out_layout, MutAnyOrigin](out_buf)
 
-        expected_buf = ctx.enqueue_create_host_buffer[dtype](
-            SIZE * SIZE
-        ).enqueue_fill(1)
+        expected_buf = ctx.enqueue_create_host_buffer[dtype](SIZE * SIZE)
+        expected_buf.enqueue_fill(1)
 
-        a = ctx.enqueue_create_buffer[dtype](SIZE * SIZE).enqueue_fill(1)
-        a_tensor = LayoutTensor[dtype, a_layout, MutableAnyOrigin](
-            a.unsafe_ptr()
-        )
+        a = ctx.enqueue_create_buffer[dtype](SIZE * SIZE)
+        a.enqueue_fill(1)
 
-        ctx.enqueue_function[add_10_blocks_2d[out_layout, a_layout]](
+        with a.map_to_host() as a_host:
+            for j in range(SIZE):
+                for i in range(SIZE):
+                    k = j * SIZE + i
+                    a_host[k] = k
+                    expected_buf[k] = k + 10
+
+        a_tensor = LayoutTensor[dtype, a_layout, ImmutAnyOrigin](a)
+
+        comptime kernel = add_10_blocks_2d[out_layout, a_layout]
+        ctx.enqueue_function_checked[kernel, kernel](
             out_tensor,
             a_tensor,
-            SIZE,
+            UInt(SIZE),
             grid_dim=BLOCKS_PER_GRID,
             block_dim=THREADS_PER_BLOCK,
         )
 
         ctx.synchronize()
 
-        expected_tensor = LayoutTensor[dtype, out_layout, MutableAnyOrigin](
-            expected_buf.unsafe_ptr()
+        expected_tensor = LayoutTensor[dtype, out_layout, MutAnyOrigin](
+            expected_buf
         )
-        for i in range(SIZE):
-            for j in range(SIZE):
-                expected_tensor[i, j] += 10
 
         with out_buf.map_to_host() as out_buf_host:
             print(
                 "out:",
-                LayoutTensor[dtype, out_layout, MutableAnyOrigin](
-                    out_buf_host.unsafe_ptr()
-                ),
+                LayoutTensor[dtype, out_layout, MutAnyOrigin](out_buf_host),
             )
             print("expected:", expected_tensor)
             for i in range(SIZE):

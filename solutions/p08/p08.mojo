@@ -2,21 +2,21 @@ from memory import UnsafePointer, stack_allocation
 from gpu import thread_idx, block_idx, block_dim, barrier
 from gpu.host import DeviceContext
 from gpu.memory import AddressSpace
-from sys import sizeof
+from sys import size_of
 from testing import assert_equal
 
-alias TPB = 4
-alias SIZE = 8
-alias BLOCKS_PER_GRID = (2, 1)
-alias THREADS_PER_BLOCK = (TPB, 1)
-alias dtype = DType.float32
+comptime TPB = 4
+comptime SIZE = 8
+comptime BLOCKS_PER_GRID = (2, 1)
+comptime THREADS_PER_BLOCK = (TPB, 1)
+comptime dtype = DType.float32
 
 
 # ANCHOR: add_10_shared_solution
 fn add_10_shared(
-    output: UnsafePointer[Scalar[dtype]],
-    a: UnsafePointer[Scalar[dtype]],
-    size: Int,
+    output: UnsafePointer[Scalar[dtype], MutAnyOrigin],
+    a: UnsafePointer[Scalar[dtype], MutAnyOrigin],
+    size: UInt,
 ):
     shared = stack_allocation[
         TPB,
@@ -31,6 +31,10 @@ fn add_10_shared(
 
     # wait for all threads to complete
     # works within a thread block
+    # Note: barrier is not strictly needed here since each thread only accesses its own shared memory location.
+    # However, it's included to teach proper shared memory synchronization patterns
+    # for more complex scenarios where threads need to coordinate access to shared data.
+    # For this specific puzzle, we can remove the barrier since each thread only accesses its own shared memory location.
     barrier()
 
     # process using shared memory
@@ -43,17 +47,20 @@ fn add_10_shared(
 
 def main():
     with DeviceContext() as ctx:
-        out = ctx.enqueue_create_buffer[dtype](SIZE).enqueue_fill(0)
-        a = ctx.enqueue_create_buffer[dtype](SIZE).enqueue_fill(1)
-        ctx.enqueue_function[add_10_shared](
-            out.unsafe_ptr(),
-            a.unsafe_ptr(),
-            SIZE,
+        out = ctx.enqueue_create_buffer[dtype](SIZE)
+        out.enqueue_fill(0)
+        a = ctx.enqueue_create_buffer[dtype](SIZE)
+        a.enqueue_fill(1)
+        ctx.enqueue_function_checked[add_10_shared, add_10_shared](
+            out,
+            a,
+            UInt(SIZE),
             grid_dim=BLOCKS_PER_GRID,
             block_dim=THREADS_PER_BLOCK,
         )
 
-        expected = ctx.enqueue_create_host_buffer[dtype](SIZE).enqueue_fill(11)
+        expected = ctx.enqueue_create_host_buffer[dtype](SIZE)
+        expected.enqueue_fill(11)
 
         ctx.synchronize()
 
