@@ -63,6 +63,7 @@ fn conv_1d_block_boundary[
 ):
     # global_i = # fill in
     # local_i = # fill in
+<<<<<<< Updated upstream
     ...
     # FILL ME IN (roughly 18 lines)
     gi = block_dim.x * block_idx.x + thread_idx.x  # fill in
@@ -71,16 +72,39 @@ fn conv_1d_block_boundary[
     shared = LayoutTensor[
         dtype,
         Layout.row_major(TPB),
+=======
+    # ...
+    # FILL ME IN (roughly 18 lines)
+    gi = block_dim.x * block_idx.x + thread_idx.x  # fill in
+    li = thread_idx.x  # fill in
+    # FILL ME IN (roughly 14 lines)
+    shared = LayoutTensor[
+        dtype,
+        Layout.row_major(TPB + CONV_2 - 1),
+>>>>>>> Stashed changes
         MutAnyOrigin,
         address_space = AddressSpace.SHARED,
     ].stack_allocation()
     if gi < SIZE:
         for j in range(min(3, SIZE - gi)):
+<<<<<<< Updated upstream
             shared[gi] += a[gi + j] * b[j]
         barrier()
         if gi == 0:
             for i in range(SIZE):
                 output[i] = shared[i]
+=======
+            shared[li] += a[gi + j] * b[j]
+        barrier()
+        # if gi == 0:
+        if li == 0:
+            # for i in range(SIZE):
+            #     output[i] = shared[i]
+            # bs = block_dim.x * block_idx.x
+            for i in range(block_dim.x):
+                output[gi + i] = shared[i]
+            # barrier()
+>>>>>>> Stashed changes
 
 
 # ANCHOR_END: conv_1d_block_boundary
@@ -134,6 +158,8 @@ def main():
             comptime kernel = conv_1d_block_boundary[
                 in_2_layout, out_2_layout, conv_2_layout, dtype
             ]
+            # print(a_tensor)
+            # print(b_tensor)
             ctx.enqueue_function_checked[kernel, kernel](
                 out_tensor,
                 a_tensor,
