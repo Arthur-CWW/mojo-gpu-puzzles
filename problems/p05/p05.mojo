@@ -16,9 +16,12 @@ fn broadcast_add(
     b: UnsafePointer[Scalar[dtype], MutAnyOrigin],
     size: UInt,
 ):
-    row = thread_idx.y
-    col = thread_idx.x
+    i = thread_idx.y
+    j = thread_idx.x
     # FILL ME IN (roughly 2 lines)
+
+    if i < size and j < size:
+        output[i * size + j] = a[j] + b[i]
 
 
 # ANCHOR_END: broadcast_add
@@ -40,6 +43,8 @@ def main():
             for i in range(SIZE):
                 for j in range(SIZE):
                     expected[i * SIZE + j] = a_host[j] + b_host[i]
+            print(a_host)
+            print(b_host)
 
         ctx.enqueue_function_checked[broadcast_add, broadcast_add](
             out,
