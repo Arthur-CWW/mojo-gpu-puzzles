@@ -4,9 +4,9 @@ from layout import Layout, LayoutTensor
 from testing import assert_equal
 
 # ANCHOR: broadcast_add_layout_tensor
-comptime SIZE = 2
+comptime SIZE = 3
 comptime BLOCKS_PER_GRID = 1
-comptime THREADS_PER_BLOCK = (3, 3)
+comptime THREADS_PER_BLOCK = (4, 4)
 comptime dtype = DType.float32
 comptime out_layout = Layout.row_major(SIZE, SIZE)
 comptime a_layout = Layout.row_major(1, SIZE)
@@ -23,9 +23,11 @@ fn broadcast_add[
     b: LayoutTensor[dtype, b_layout, ImmutAnyOrigin],
     size: UInt,
 ):
-    row = thread_idx.y
-    col = thread_idx.x
+    i = thread_idx.y
+    j = thread_idx.x
     # FILL ME IN (roughly 2 lines)
+    if i < size and j < size:
+        output[i, j] = a[0, j] + b[i, 0]
 
 
 # ANCHOR_END: broadcast_add_layout_tensor
@@ -49,7 +51,7 @@ def main():
         with a.map_to_host() as a_host, b.map_to_host() as b_host:
             for i in range(SIZE):
                 a_host[i] = i + 1
-                b_host[i] = i * 10
+                b_host[i] = i * 9
 
             for i in range(SIZE):
                 for j in range(SIZE):

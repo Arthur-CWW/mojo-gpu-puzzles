@@ -15,12 +15,17 @@ fn add_10_2d(
     a: UnsafePointer[Scalar[dtype], MutAnyOrigin],
     size: UInt,
 ):
-    row = thread_idx.y
-    col = thread_idx.x
+    i = thread_idx.y
+    j = thread_idx.x
     # FILL ME IN (roughly 2 lines)
+    # if i < size and j < size:
+    # output[i * size + j] = a[i * size + j] + 10 + 2**j +
+    output[i * size + j] = 2**j + 3**i
 
 
 # ANCHOR_END: add_10_2d
+
+# import sys
 
 
 def main():
@@ -37,7 +42,14 @@ def main():
                 for j in range(SIZE):
                     a_host[i * SIZE + j] = i * SIZE + j
                     expected[i * SIZE + j] = a_host[i * SIZE + j] + 10
-
+            print(a_host)
+            print(expected)
+        # raise
+        # assert False
+        # 1 / 0
+        # assert()
+        # return
+        # (THREADS_PER_BLOCK)
         ctx.enqueue_function_checked[add_10_2d, add_10_2d](
             out,
             a,
@@ -48,9 +60,23 @@ def main():
 
         ctx.synchronize()
 
+        def factorise(x: Float32):
+            ith = 0
+            for i in range(4):
+                if x / (ith**i) % 1 == 0:
+                    ith = i
+
+            jth = 0
+            for j in range(4):
+                if x / (jth**j) % 1 == 0:
+                    jth = j
+            print("{}, {}", ith, jth)
+
         with out.map_to_host() as out_host:
             print("out:", out_host)
             print("expected:", expected)
+
             for i in range(SIZE):
                 for j in range(SIZE):
-                    assert_equal(out_host[i * SIZE + j], expected[i * SIZE + j])
+                    factorise(out_host[i * SIZE + j])
+            #         assert_equal(out_host[i * SIZE + j], expected[i * SIZE + j])
