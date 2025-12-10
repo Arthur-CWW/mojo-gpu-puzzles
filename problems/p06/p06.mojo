@@ -15,7 +15,7 @@ fn add_10_blocks(
     a: UnsafePointer[Scalar[dtype], MutAnyOrigin],
     size: UInt,
 ):
-    i = block_dim.x * block_idx.x + thread_idx.x
+    i = # fill in
     # FILL ME IN (roughly 2 lines)
     if i < size:
         output[i] = a[i] + 10

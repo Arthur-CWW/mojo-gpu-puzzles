@@ -25,7 +25,36 @@ fn dot_product[
     size: UInt,
 ):
     # FILL ME IN (roughly 13 lines)
-    ...
+    # ...
+    shared = LayoutTensor[
+        dtype,
+        Layout.row_major(TPB),
+        MutAnyOrigin,
+        address_space = AddressSpace.SHARED,
+    ].stack_allocation()
+    gi = block_idx.x * block_dim.x + thread_idx.x
+
+    local_i = thread_idx.x
+    if local_i < size:
+        shared[local_i] = a[gi] * b[gi]
+    barrier()
+
+    if local_i == 0:
+        for i in range(size):
+            output[0] += shared[i]
+
+    # barrier()
+    # stride = UInt(TPB // 2)
+    # while stride > 0:
+    #     if local_i < stride:
+    #         shared[local_i] += shared[local_i + stride]
+
+    #     barrier()
+    #     stride //= 2
+
+    # # Only thread 0 writes the final result
+    # if local_i == 0:
+    #     output[0] = shared[0]
 
 
 # ANCHOR_END: dot_product_layout_tensor

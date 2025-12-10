@@ -22,8 +22,8 @@ fn prefix_sum_simple[
     a: LayoutTensor[dtype, layout, ImmutAnyOrigin],
     size: UInt,
 ):
-    global_i = block_dim.x * block_idx.x + thread_idx.x
-    local_i = thread_idx.x
+    global_i = # fill in
+    local_i = # fill in
     # FILL ME IN (roughly 18 lines)
 
 
@@ -46,8 +46,8 @@ fn prefix_sum_local_phase[
     a: LayoutTensor[dtype, in_layout, ImmutAnyOrigin],
     size: UInt,
 ):
-    global_i = block_dim.x * block_idx.x + thread_idx.x
-    local_i = thread_idx.x
+    global_i = # fill in
+    local_i = # fill in
     # FILL ME IN (roughly 20 lines)
 
 
@@ -55,7 +55,7 @@ fn prefix_sum_local_phase[
 fn prefix_sum_block_sum_phase[
     layout: Layout
 ](output: LayoutTensor[dtype, layout, MutAnyOrigin], size: UInt):
-    global_i = block_dim.x * block_idx.x + thread_idx.x
+    global_i = # fill in
     # FILL ME IN (roughly 3 lines)
 
 

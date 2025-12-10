@@ -29,7 +29,7 @@ fn cluster_coordination_basics[
     size: Int,
 ):
     """Real cluster coordination using SM90+ cluster APIs."""
-    global_i = Int(block_dim.x * block_idx.x + thread_idx.x)
+    global_i = # fill in
     local_i = thread_idx.x
 
     # Check what's happening with cluster ranks
@@ -87,7 +87,7 @@ fn cluster_collective_operations[
     size: Int,
 ):
     """Cluster-wide collective operations using real cluster APIs."""
-    global_i = Int(block_dim.x * block_idx.x + thread_idx.x)
+    global_i = # fill in
     local_i = Int(thread_idx.x)
 
     # FILL IN (roughly 24 lines)
@@ -106,7 +106,7 @@ fn advanced_cluster_patterns[
 ):
     """Advanced cluster programming using cluster masks and relaxed synchronization.
     """
-    global_i = Int(block_dim.x * block_idx.x + thread_idx.x)
+    global_i = # fill in
     local_i = Int(thread_idx.x)
 
     # FILL IN (roughly 26 lines)

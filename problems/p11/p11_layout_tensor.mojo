@@ -32,6 +32,13 @@ fn pooling[
     local_i = thread_idx.x
     # FIX ME IN (roughly 10 lines)
 
+    if global_i < size:
+        shared[local_i] = a[global_i]
+    barrier()
+
+    for gi in range(global_i, min(global_i + 3, size)):
+        output[gi] += shared[local_i]
+
 
 # ANCHOR_END: pooling_layout_tensor
 

@@ -20,9 +20,11 @@ fn add_10_blocks_2d[
     a: LayoutTensor[dtype, a_layout, ImmutAnyOrigin],
     size: UInt,
 ):
-    row = block_dim.y * block_idx.y + thread_idx.y
-    col = block_dim.x * block_idx.x + thread_idx.x
+    i = block_dim.y * block_idx.y + thread_idx.y
+    j = block_dim.x * block_idx.x + thread_idx.x
     # FILL ME IN (roughly 2 lines)
+    if i < size and j < size:
+        output[i, j] = a[i, j] + 10
 
 
 # ANCHOR_END: add_10_blocks_2d_layout_tensor

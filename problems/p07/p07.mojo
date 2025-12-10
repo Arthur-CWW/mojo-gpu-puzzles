@@ -15,9 +15,12 @@ fn add_10_blocks_2d(
     a: UnsafePointer[Scalar[dtype], MutAnyOrigin],
     size: UInt,
 ):
-    row = block_dim.y * block_idx.y + thread_idx.y
-    col = block_dim.x * block_idx.x + thread_idx.x
+    i = # fill in
+    j = # fill in
     # FILL ME IN (roughly 2 lines)
+    # assert_equal(size, 5)
+    if i < size and j < size:
+        output[i * size + j] = a[i * size + j] + 10
 
 
 # ANCHOR_END: add_10_blocks_2d

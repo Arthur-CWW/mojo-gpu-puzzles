@@ -23,9 +23,15 @@ fn pooling(
         Scalar[dtype],
         address_space = AddressSpace.SHARED,
     ]()
-    global_i = block_dim.x * block_idx.x + thread_idx.x
-    local_i = thread_idx.x
+    local_i = thread_idx.x  # fill in
+    global_i = block_dim.x * block_idx.x + thread_idx.x  # fill in
     # FILL ME IN (roughly 10 lines)
+    if global_i < size:
+        shared[local_i] = a[global_i]
+    barrier()
+
+    for gi in range(global_i, min(global_i + 3, size)):
+        output[gi] += shared[local_i]
 
 
 # ANCHOR_END: pooling

@@ -23,8 +23,8 @@ fn naive_matmul[
     a: LayoutTensor[dtype, layout, ImmutAnyOrigin],
     b: LayoutTensor[dtype, layout, ImmutAnyOrigin],
 ):
-    row = block_dim.y * block_idx.y + thread_idx.y
-    col = block_dim.x * block_idx.x + thread_idx.x
+    i = # fill in
+    j = # fill in
     # FILL ME IN (roughly 6 lines)
 
 
@@ -39,10 +39,10 @@ fn single_block_matmul[
     a: LayoutTensor[dtype, layout, ImmutAnyOrigin],
     b: LayoutTensor[dtype, layout, ImmutAnyOrigin],
 ):
-    row = block_dim.y * block_idx.y + thread_idx.y
-    col = block_dim.x * block_idx.x + thread_idx.x
-    local_row = thread_idx.y
-    local_col = thread_idx.x
+    i = # fill in
+    j = # fill in
+    local_i = # fill in
+    local_j = # fill in
     # FILL ME IN (roughly 12 lines)
 
 
@@ -62,10 +62,10 @@ fn matmul_tiled[
     a: LayoutTensor[dtype, layout_tiled, ImmutAnyOrigin],
     b: LayoutTensor[dtype, layout_tiled, ImmutAnyOrigin],
 ):
-    local_row = thread_idx.y
-    local_col = thread_idx.x
-    tiled_row = block_idx.y * TPB + thread_idx.y
-    tiled_col = block_idx.x * TPB + thread_idx.x
+    local_row = # fill in
+    local_col = # fill in
+    tiled_row = # fill in
+    tiled_col = # fill in
     # FILL ME IN (roughly 20 lines)
 
 

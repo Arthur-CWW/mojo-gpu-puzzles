@@ -24,7 +24,7 @@ fn kernel1[
     b: LayoutTensor[dtype, layout, ImmutAnyOrigin],
     size: Int,
 ):
-    i = block_dim.x * block_idx.x + thread_idx.x
+    i = # fill in
     if i < size:
         output[i] = a[i] + b[i]
 

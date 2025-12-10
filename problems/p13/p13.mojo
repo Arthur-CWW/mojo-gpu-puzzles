@@ -24,9 +24,22 @@ fn conv_1d_simple[
     a: LayoutTensor[dtype, in_layout, ImmutAnyOrigin],
     b: LayoutTensor[dtype, conv_layout, ImmutAnyOrigin],
 ):
-    global_i = block_dim.x * block_idx.x + thread_idx.x
-    local_i = Int(thread_idx.x)
+    gi = block_dim.x * block_idx.x + thread_idx.x  # fill in
+    local_i = thread_idx.x  # fill in
     # FILL ME IN (roughly 14 lines)
+    shared = LayoutTensor[
+        dtype,
+        Layout.row_major(TPB),
+        MutAnyOrigin,
+        address_space = AddressSpace.SHARED,
+    ].stack_allocation()
+    if gi < SIZE:
+        for j in range(min(3, SIZE - gi)):
+            shared[gi] += a[gi + j] * b[j]
+        barrier()
+        if gi == 0:
+            for i in range(SIZE):
+                output[i] = shared[i]
 
 
 # ANCHOR_END: conv_1d_simple
@@ -48,9 +61,26 @@ fn conv_1d_block_boundary[
     a: LayoutTensor[dtype, in_layout, ImmutAnyOrigin],
     b: LayoutTensor[dtype, conv_layout, ImmutAnyOrigin],
 ):
-    global_i = Int(block_dim.x * block_idx.x + thread_idx.x)
-    local_i = Int(thread_idx.x)
+    # global_i = # fill in
+    # local_i = # fill in
+    ...
     # FILL ME IN (roughly 18 lines)
+    gi = block_dim.x * block_idx.x + thread_idx.x  # fill in
+    local_i = thread_idx.x  # fill in
+    # FILL ME IN (roughly 14 lines)
+    shared = LayoutTensor[
+        dtype,
+        Layout.row_major(TPB),
+        MutAnyOrigin,
+        address_space = AddressSpace.SHARED,
+    ].stack_allocation()
+    if gi < SIZE:
+        for j in range(min(3, SIZE - gi)):
+            shared[gi] += a[gi + j] * b[j]
+        barrier()
+        if gi == 0:
+            for i in range(SIZE):
+                output[i] = shared[i]
 
 
 # ANCHOR_END: conv_1d_block_boundary

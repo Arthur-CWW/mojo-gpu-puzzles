@@ -19,8 +19,8 @@ fn shared_memory_race(
     a: LayoutTensor[dtype, layout, ImmutAnyOrigin],
     size: UInt,
 ):
-    row = thread_idx.y
-    col = thread_idx.x
+    i = # fill in
+    j = # fill in
 
     shared_sum = LayoutTensor[
         dtype,
@@ -29,13 +29,13 @@ fn shared_memory_race(
         address_space = AddressSpace.SHARED,
     ].stack_allocation()
 
-    if row < size and col < size:
-        shared_sum[0] += a[row, col]
+    if i < size and j < size:
+        shared_sum[0] += a[i, j]
 
     barrier()
 
-    if row < size and col < size:
-        output[row, col] = shared_sum[0]
+    if i < size and j < size:
+        output[i, j] = shared_sum[0]
 
 
 # ANCHOR_END: shared_memory_race
@@ -47,9 +47,9 @@ fn add_10_2d(
     a: LayoutTensor[dtype, layout, ImmutAnyOrigin],
     size: UInt,
 ):
-    row = thread_idx.y
-    col = thread_idx.x
-    output[row, col] = a[row, col] + 10.0
+    i = # fill in
+    j = # fill in
+    output[i, j] = a[i, j] + 10.0
 
 
 # ANCHOR_END: add_10_2d_no_guard

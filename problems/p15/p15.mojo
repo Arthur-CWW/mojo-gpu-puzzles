@@ -25,9 +25,9 @@ fn axis_sum[
     a: LayoutTensor[dtype, in_layout, ImmutAnyOrigin],
     size: UInt,
 ):
-    global_i = block_dim.x * block_idx.x + thread_idx.x
-    local_i = thread_idx.x
-    batch = block_idx.y
+    global_i = # fill in
+    local_i = # fill in
+    batch = # fill in
     # FILL ME IN (roughly 15 lines)
 
 

@@ -23,17 +23,20 @@ fn add_10_shared(
         Scalar[dtype],
         address_space = AddressSpace.SHARED,
     ]()
-    global_i = block_dim.x * block_idx.x + thread_idx.x
-    local_i = thread_idx.x
+    local_i = thread_idx.x  # fill in
+    global_i = block_idx.x * block_dim.x + thread_idx.x  # fill in
     # local data into shared memory
     if global_i < size:
         shared[local_i] = a[global_i]
+        # WHY?
 
     # wait for all threads to complete
     # works within a thread block
     barrier()
 
     # FILL ME IN (roughly 2 lines)
+    if global_i < size:
+        output[global_i] = shared[local_i] + 10
 
 
 # ANCHOR_END: add_10_shared
@@ -45,6 +48,16 @@ def main():
         out.enqueue_fill(0)
         a = ctx.enqueue_create_buffer[dtype](SIZE)
         a.enqueue_fill(1)
+
+        expected = ctx.enqueue_create_host_buffer[dtype](SIZE)
+        # expected.enqueue_fill(11)
+        with a.map_to_host() as a_host:
+            for j in range(SIZE):
+                for i in range(SIZE):
+                    k = j * SIZE + i
+                    a_host[k] = k
+                    expected[k] = k + 10
+
         ctx.enqueue_function_checked[add_10_shared, add_10_shared](
             out,
             a,
@@ -52,10 +65,6 @@ def main():
             grid_dim=BLOCKS_PER_GRID,
             block_dim=THREADS_PER_BLOCK,
         )
-
-        expected = ctx.enqueue_create_host_buffer[dtype](SIZE)
-        expected.enqueue_fill(11)
-
         ctx.synchronize()
 
         with out.map_to_host() as out_host:
